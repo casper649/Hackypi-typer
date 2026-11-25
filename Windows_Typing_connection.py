@@ -13,8 +13,8 @@ typing = False
 
 root = tk.Tk()
 root.title("HackyPi - Text Entry")
-root.geometry("650x520")
-root.minsize(500, 400)
+root.geometry("700x580")
+root.minsize(550, 450)
 
 status = tk.StringVar(value="Not connected")
 speed = tk.IntVar(value=40)
@@ -85,26 +85,22 @@ def connect():
 
         time.sleep(1)
         pico.reset_input_buffer()
-
         pico.write(b'{"action":"ping"}\n')
 
         deadline = time.monotonic() + 8
 
         while time.monotonic() < deadline:
-
             response = pico.readline().decode(
                 "utf-8", errors="replace"
             ).strip()
 
             if response == "READY":
-
                 status.set("Connected to HackyPi on COM8")
 
                 threading.Thread(
                     target=read_messages,
                     daemon=True
                 ).start()
-
                 return
 
         pico.close()
@@ -119,7 +115,6 @@ def connect():
         )
 
     except Exception as error:
-
         if pico and pico.is_open:
             pico.close()
 
@@ -137,10 +132,7 @@ def connect():
 # =====================================
 
 def read_messages():
-    global typing
-
     while pico and pico.is_open:
-
         try:
             response = pico.readline().decode(
                 "utf-8", errors="replace"
@@ -251,7 +243,7 @@ def cancel():
     if typing:
         messagebox.showinfo(
             "HackyPi",
-            "Please wait for the current text entry to finish."
+            "Please wait for typing to finish."
         )
         return
 
@@ -298,34 +290,26 @@ text_box.pack(
     pady=8
 )
 
-# Right-click menu
+
+# =====================================
+# RIGHT-CLICK MENU
+# =====================================
+
 context_menu = tk.Menu(root, tearoff=0)
 
-context_menu.add_command(
-    label="Cut",
-    command=cut_text
-)
-
-context_menu.add_command(
-    label="Copy",
-    command=copy_text
-)
-
-context_menu.add_command(
-    label="Paste",
-    command=paste_text
-)
-
+context_menu.add_command(label="Cut", command=cut_text)
+context_menu.add_command(label="Copy", command=copy_text)
+context_menu.add_command(label="Paste", command=paste_text)
 context_menu.add_separator()
-
-context_menu.add_command(
-    label="Select All",
-    command=select_all
-)
+context_menu.add_command(label="Select All", command=select_all)
 
 text_box.bind("<Button-3>", show_context_menu)
 
-# Keyboard shortcuts
+
+# =====================================
+# KEYBOARD SHORTCUTS
+# =====================================
+
 text_box.bind("<Control-a>", select_all)
 text_box.bind("<Control-A>", select_all)
 text_box.bind("<Control-c>", copy_text)
@@ -335,7 +319,11 @@ text_box.bind("<Control-X>", cut_text)
 text_box.bind("<Control-v>", paste_text)
 text_box.bind("<Control-V>", paste_text)
 
-# Typing settings
+
+# =====================================
+# TYPING SETTINGS
+# =====================================
+
 settings = tk.Frame(root)
 settings.pack(fill="x", padx=18, pady=10)
 
@@ -350,14 +338,18 @@ tk.Spinbox(
     to=100,
     width=7,
     textvariable=speed
-).pack(side="left", padx=10)
+).pack(side="left", padx=8)
 
 tk.Label(
     settings,
     text="US keyboard layout"
 ).pack(side="right")
 
-# Buttons
+
+# =====================================
+# BUTTONS
+# =====================================
+
 buttons = tk.Frame(root)
 buttons.pack(pady=10)
 
@@ -384,11 +376,21 @@ tk.Button(
     command=cancel
 ).pack(side="left", padx=5)
 
+
+# =====================================
+# STATUS
+# =====================================
+
 tk.Label(
     root,
     textvariable=status,
     font=("Segoe UI", 10)
 ).pack(pady=12)
+
+
+# =====================================
+# APPLICATION START
+# =====================================
 
 root.protocol("WM_DELETE_WINDOW", cancel)
 
